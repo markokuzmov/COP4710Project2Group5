@@ -90,14 +90,12 @@ CREATE TABLE Bellini.Person (
     address    NVARCHAR(250) NULL,
     is_student BIT NOT NULL DEFAULT(0),
     is_instructor BIT NOT NULL DEFAULT(0),
-    hire_date DATE NULL,
     created_at DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 
 -- Students specific info
 CREATE TABLE Bellini.Student (
     student_id INT PRIMARY KEY, -- same as person_id
-    banner_id  CHAR(10) NOT NULL UNIQUE, -- e.g., 'S20250001'
     major_code CHAR(5) NOT NULL,
     admit_term VARCHAR(20) NOT NULL,
     classification VARCHAR(20) NULL, -- e.g., 'Freshman'
@@ -127,7 +125,6 @@ CREATE TABLE Bellini.Instructor (
     instructor_id INT PRIMARY KEY, -- same as person_id
     office_location NVARCHAR(100) NULL,
     office_hours NVARCHAR(200) NULL,
-    hire_rank NVARCHAR(50) NULL, -- e.g. 'Professor'
     FOREIGN KEY (instructor_id) REFERENCES Bellini.Person(person_id)
 );
 
@@ -145,8 +142,7 @@ CREATE TABLE Bellini.Semester (
 CREATE TABLE Bellini.Location (
     location_id INT IDENTITY(1,1) PRIMARY KEY,
     building NVARCHAR(100) NOT NULL,
-    room NVARCHAR(30) NOT NULL,
-    capacity INT NULL
+    room NVARCHAR(30) NOT NULL
 );
 
 -- Classes/sections (a specific offering of a course in a semester)
@@ -377,19 +373,19 @@ VALUES
 (2026,'Spring','2026-01-12','2026-05-08');
 
 -- Locations
-INSERT INTO Bellini.Location (building, room, capacity)
+INSERT INTO Bellini.Location (building, room)
 VALUES
-('Bellini Hall','101',60),
-('Bellini Hall','102',40),
-('Engineering Building','201',80);
+('Bellini Hall','101'),
+('Bellini Hall','102'),
+('Engineering Building','201');
 
 -- People: instructors and students (person table)
 -- Instructors
-INSERT INTO Bellini.Person (first_name, last_name, email, phone, is_instructor, hire_date)
+INSERT INTO Bellini.Person (first_name, last_name, email, phone, is_instructor)
 VALUES
-('Alice','Nguyen','anguyen@bellini.edu','555-1001',1,'2015-08-01'),
-('Robert','Smith','rsmith@bellini.edu','555-1002',1,'2018-09-01'),
-('Karen','Lopez','klopez@bellini.edu','555-1003',1,'2020-01-15');
+('Alice','Nguyen','anguyen@bellini.edu','555-1001',1),
+('Robert','Smith','rsmith@bellini.edu','555-1002',1),
+('Karen','Lopez','klopez@bellini.edu','555-1003',1);
 
 -- Capture inserted person ids for instructors
 -- (assuming identity started at 1000)
@@ -421,9 +417,8 @@ VALUES
 -- We'll map person.person_id to banner_id and majors
 -- For deterministic sample, query the Person rows to find ids; but here we will JOIN to insert.
 -- Assign majors roughly balanced
-INSERT INTO Bellini.Student (student_id, banner_id, major_code, admit_term, classification, attempted_hours, earned_hours, gpa)
+INSERT INTO Bellini.Student (student_id, major_code, admit_term, classification, attempted_hours, earned_hours, gpa)
 SELECT person_id,
-       'S' + RIGHT('2026' + CAST(ROW_NUMBER() OVER (ORDER BY person_id) AS VARCHAR(6)),6) AS banner_id,
        CASE WHEN rn % 4 = 1 THEN 'BSCS' WHEN rn % 4 = 2 THEN 'BSIT' WHEN rn % 4 = 3 THEN 'BSCP' ELSE 'BSCyS' END AS major_code,
        'Fall 2024' AS admit_term,
        'Sophomore' AS classification,
