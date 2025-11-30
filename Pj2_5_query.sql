@@ -204,7 +204,6 @@ DECLARE @StudentId INT = 1003; -- example student_id
 -- Step 1: Find courses required by student's major that are not yet taken
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -233,7 +232,6 @@ ORDER BY co.level, mc.required_type, co.course_id;
 -- Step 2: Calculate total hours needed to complete the degree
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -253,12 +251,10 @@ LEFT JOIN Bellini.MajorCourse mc ON m.major_code = mc.major_code
         WHERE e.student_id = @StudentId
             AND e.status IN ('ENROLLED', 'COMPLETED')
     )
-LEFT JOIN Bellini.Course co ON mc.course_id = co.course_id
+    LEFT JOIN Bellini.Course co ON mc.course_id = co.course_id
 WHERE s.student_id = @StudentId
-GROUP BY s.student_id, s.banner_id, p.first_name, p.last_name, 
-         s.major_code, m.name, m.total_req_hours, s.earned_hours;
-
---------------------------------------------------------------------------------
+GROUP BY s.student_id, p.first_name, p.last_name, 
+         s.major_code, m.name, m.total_req_hours, s.earned_hours;--------------------------------------------------------------------------------
 -- 3.8.4: View four-year study plan, semester by semester
 --------------------------------------------------------------------------------
 
@@ -522,8 +518,6 @@ SELECT
     p.address,
     i.office_location,
     i.office_hours,
-    i.hire_rank,
-    p.hire_date,
     'Instructor' AS person_type
 FROM Bellini.Person p
 JOIN Bellini.Instructor i ON p.person_id = i.instructor_id
@@ -539,7 +533,6 @@ SELECT
     p.email,
     p.phone,
     p.address,
-    s.banner_id,
     s.major_code,
     m.name AS major_name,
     s.admit_term,
@@ -562,7 +555,6 @@ SELECT
     CONCAT(p.first_name, ' ', p.last_name) AS full_name,
     p.email,
     p.phone,
-    s.banner_id,
     s.major_code,
     m.name AS major_name,
     s.classification,
@@ -588,14 +580,13 @@ SELECT
     p.person_id,
     CONCAT(p.first_name, ' ', p.last_name) AS full_name,
     p.email,
-    s.banner_id,
     s.major_code,
     s.gpa,
     COUNT(c.class_id) AS classes_as_ta
 FROM Bellini.Person p
 JOIN Bellini.Student s ON p.person_id = s.student_id
 JOIN Bellini.Class c ON s.student_id = c.ta_student_id
-GROUP BY p.person_id, p.first_name, p.last_name, p.email, s.banner_id, s.major_code, s.gpa
+GROUP BY p.person_id, p.first_name, p.last_name, p.email, s.major_code, s.gpa
 ORDER BY p.last_name, p.first_name;
 
 --------------------------------------------------------------------------------
@@ -757,7 +748,6 @@ GROUP BY s.major_code, m.name;
 -- Detailed list of students by major with their GPA
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -802,7 +792,6 @@ GROUP BY c.class_id, c.course_id, co.title, c.section, c.crn, sem.year, sem.term
 SELECT 
     e.enrollment_id,
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -847,7 +836,6 @@ DECLARE @WhatIfStudentId INT = 1003;
 -- Current student status
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     s.earned_hours AS current_earned_hours,
@@ -996,7 +984,6 @@ CROSS JOIN NewQualityPoints nqp;
 WITH CurrentStatus AS (
     SELECT 
         s.student_id,
-        s.banner_id,
         CONCAT(p.first_name, ' ', p.last_name) AS student_name,
         s.earned_hours,
         s.gpa,
@@ -1034,7 +1021,6 @@ NewTotals AS (
 )
 SELECT 
     cs.student_id,
-    cs.banner_id,
     cs.student_name,
     cs.current_gpa,
     cs.earned_hours AS current_earned_hours,
@@ -1076,7 +1062,6 @@ DECLARE @TranscriptTerm VARCHAR(20) = 'Fall';
 
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -1134,7 +1119,6 @@ DECLARE @OverallTranscriptStudentId INT = 1003;
 
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -1162,7 +1146,6 @@ ORDER BY sem.year, sem.term, co.course_id;
 -- Overall transcript summary
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     s.major_code,
     m.name AS major_name,
@@ -1325,7 +1308,6 @@ DECLARE @ScheduleTerm VARCHAR(20) = 'Spring';
 
 SELECT 
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     cs.day_of_week,
     cs.start_time,
@@ -1568,7 +1550,6 @@ SELECT
     co.title AS course_title,
     c.section,
     e.enrollment_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     e.grade_letter,
     e.grade_points,
@@ -1645,7 +1626,6 @@ WHERE c.class_id = @RosterClassId;
 -- View class roster without student details (just names and enrollment status)
 SELECT 
     e.enrollment_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     p.email AS student_email,
     e.status AS enrollment_status,
@@ -1662,7 +1642,6 @@ ORDER BY p.last_name, p.first_name;
 SELECT 
     e.enrollment_id,
     s.student_id,
-    s.banner_id,
     CONCAT(p.first_name, ' ', p.last_name) AS student_name,
     p.email AS student_email,
     s.major_code,
