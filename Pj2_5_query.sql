@@ -1,5 +1,5 @@
 -- Query file for Pj2_5 (SQL Server)
--- Contains DML statements to support functional requirements 3.8.1 through 3.8.8
+-- Contains DML statements to support functional requirements 3.8.1 through 3.8.16
 -- Each query is numbered and commented according to the requirement specification
 
 USE [Pj2_5];
